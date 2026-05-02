@@ -1,0 +1,12 @@
+{% extends 'courses/base.html' %}
+
+{% block content %}
+<div class="row justify-content-center mt-5">
+    <div class="col-md-6 text-center">
+        <i class="fas fa-hourglass-half fa-4x text-warning mb-4"></i>
+        <h2 class="fw-bold mb-3">Pending Approval</h2>
+        <p class="lead text-muted mb-4">Your instructor account is currently pending approval by an administrator. You will be able to access your dashboard and create courses once your account is approved.</p>
+        <a href="{% url 'home' %}" class="btn btn-primary">Return to Homepage</a>
+    </div>
+</div>
+{% endblock %}

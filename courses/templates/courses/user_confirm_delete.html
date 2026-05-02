@@ -1,0 +1,17 @@
+{% extends 'courses/base.html' %}
+
+{% block content %}
+<div class="row justify-content-center mt-5">
+    <div class="col-md-6 border rounded p-4 shadow-sm bg-white text-center">
+        <i class="fas fa-exclamation-triangle fa-3x text-danger mb-3"></i>
+        <h3 class="mb-4">Confirm Deletion</h3>
+        <p class="lead">Are you sure you want to delete the user <strong>{{ user_to_delete.username }}</strong>?</p>
+        <p class="text-muted small">This action cannot be undone and will remove all their enrollments and created courses.</p>
+        <form method="POST" class="mt-4">
+            {% csrf_token %}
+            <a href="{% url 'manage_users' %}" class="btn btn-secondary me-2">Cancel</a>
+            <button type="submit" class="btn btn-danger">Confirm Delete</button>
+        </form>
+    </div>
+</div>
+{% endblock %}

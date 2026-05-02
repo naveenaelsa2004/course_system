@@ -1,0 +1,51 @@
+{% extends 'courses/base.html' %}
+
+{% block content %}
+<div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-5 mt-4 gap-3">
+    <div>
+        <h1 class="fw-bold mb-1">Enrolled Students</h1>
+        <p class="text-muted mb-0">Reviewing roster for <span class="text-primary fw-bold">{{ course.title }}</span></p>
+    </div>
+    <a href="{% url 'dashboard' %}" class="btn btn-outline-primary px-4 py-2">
+        <i class="fas fa-arrow-left me-2"></i>Back to Studio
+    </a>
+</div>
+
+<div class="card border-0 shadow-sm overflow-hidden">
+    <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+            <thead class="bg-light">
+                <tr>
+                    <th class="px-4 py-3 text-muted small text-uppercase fw-bold">Student</th>
+                    <th class="px-4 py-3 text-muted small text-uppercase fw-bold">Email</th>
+                    <th class="px-4 py-3 text-muted small text-uppercase fw-bold">Enrolled On</th>
+                    <th class="px-4 py-3 text-muted small text-uppercase fw-bold text-end">Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for enrollment in enrollments %}
+                <tr class="border-light">
+                    <td class="px-4 py-3">
+                        <div class="d-flex align-items-center">
+                            <div class="rounded-circle bg-primary bg-opacity-10 me-3 d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+                                <i class="fas fa-graduation-cap text-primary"></i>
+                            </div>
+                            <span class="fw-bold text-dark">{{ enrollment.student.username }}</span>
+                        </div>
+                    </td>
+                    <td class="px-4 py-3 text-muted">{{ enrollment.student.email }}</td>
+                    <td class="px-4 py-3 text-muted small">{{ enrollment.enrollment_date|date:"M d, Y" }}</td>
+                    <td class="px-4 py-3 text-end">
+                        <span class="badge bg-success bg-opacity-10 text-success border-0">Active</span>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="4" class="text-center py-5 text-muted">No students enrolled in this course yet.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

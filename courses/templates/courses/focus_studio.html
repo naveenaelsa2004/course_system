@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Focus Studio | {{ course.title }}</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #1a140f; /* Deepest Espresso */
+            --card-bg: rgba(45, 30, 20, 0.7);
+            --accent-color: #c68642; /* Caramel */
+            --text-color: #fdfaf7; /* Cream */
+            --muted-text: #8b7d72;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-family: 'Inter', sans-serif;
+            height: 100vh;
+            margin: 0;
+            overflow: hidden;
+            transition: background 0.5s ease;
+        }
+
+        .zen-mode body {
+            background-color: #020617;
+        }
+
+        .focus-container {
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            backdrop-filter: blur(10px);
+            position: relative;
+            z-index: 1;
+        }
+
+        .background-blob {
+            position: absolute;
+            width: 500px;
+            height: 500px;
+            background: radial-gradient(circle, rgba(198, 134, 66, 0.15) 0%, rgba(198, 134, 66, 0) 70%);
+            border-radius: 50%;
+            z-index: 0;
+            animation: pulse 10s infinite alternate;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1) translate(-20%, -20%); }
+            100% { transform: scale(1.2) translate(20%, 20%); }
+        }
+
+        .timer-display {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 8rem;
+            font-weight: 700;
+            letter-spacing: -4px;
+            margin-bottom: 1rem;
+            text-shadow: 0 0 20px rgba(198, 134, 66, 0.3);
+        }
+
+        .timer-controls button {
+            background: var(--card-bg);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: var(--text-color);
+            padding: 1rem 2rem;
+            border-radius: 50px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            margin: 0 0.5rem;
+            backdrop-filter: blur(5px);
+        }
+
+        .timer-controls button:hover {
+            background: rgba(198, 134, 66, 0.2);
+            border-color: var(--accent-color);
+            transform: translateY(-2px);
+        }
+
+        .timer-controls button.active {
+            background: var(--accent-color);
+            color: var(--bg-color);
+        }
+
+        .ambient-controls {
+            position: fixed;
+            bottom: 2rem;
+            left: 2rem;
+            display: flex;
+            gap: 1rem;
+        }
+
+        .ambient-btn {
+            background: var(--card-bg);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: var(--muted-text);
+            width: 50px;
+            height: 50px;
+            border-radius: 12px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .ambient-btn:hover, .ambient-btn.playing {
+            color: var(--accent-color);
+            border-color: var(--accent-color);
+            background: rgba(198, 134, 66, 0.1);
+        }
+
+        .top-bar {
+            position: fixed;
+            top: 2rem;
+            left: 2rem;
+            right: 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .course-info h1 {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin: 0;
+            color: var(--muted-text);
+        }
+
+        .back-btn {
+            color: var(--muted-text);
+            text-decoration: none;
+            font-weight: 600;
+            transition: color 0.3s ease;
+        }
+
+        .back-btn:hover {
+            color: var(--text-color);
+        }
+
+        .zen-toggle {
+            position: fixed;
+            top: 2rem;
+            right: 2rem;
+            cursor: pointer;
+            color: var(--muted-text);
+            font-size: 1.5rem;
+        }
+
+        .zen-mode .ambient-controls, .zen-mode .course-info, .zen-mode .timer-type-selector {
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.5s ease;
+        }
+
+        .timer-type-selector {
+            margin-bottom: 2rem;
+            display: flex;
+            gap: 1rem;
+        }
+
+        .timer-type-btn {
+            background: transparent;
+            border: none;
+            color: var(--muted-text);
+            font-weight: 600;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .timer-type-btn.active {
+            color: var(--accent-color);
+            background: rgba(198, 134, 66, 0.1);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .timer-display { font-size: 5rem; }
+        }
+    </style>
+</head>
+<body>
+    <div class="background-blob"></div>
+    
+    <div class="top-bar">
+        <div class="course-info">
+            <h1 class="mt-2">{{ course.title }}</h1>
+        </div>
+        <div class="d-flex align-items-center gap-3">
+            <a href="{% url 'course_detail' course.pk %}" class="btn btn-sm btn-outline-danger rounded-pill px-4 fw-bold">
+                <i class="fas fa-sign-out-alt me-2"></i>Exit Studio
+            </a>
+            <div class="zen-toggle ms-3" id="zenToggle" title="Toggle Zen Mode (Hides UI)">
+                <i class="fas fa-eye-slash"></i>
+            </div>
+        </div>
+    </div>
+
+    <div class="focus-container">
+        <div class="timer-type-selector">
+            <button class="timer-type-btn active" data-time="25">Focus</button>
+            <button class="timer-type-btn" data-time="5">Short Break</button>
+            <button class="timer-type-btn" data-time="15">Long Break</button>
+        </div>
+
+        <div class="timer-display" id="timer">25:00</div>
+        
+        <div class="timer-controls">
+            <button id="startBtn"><i class="fas fa-play me-2"></i>Start</button>
+            <button id="resetBtn"><i class="fas fa-redo me-2"></i>Reset</button>
+        </div>
+
+        <div class="mt-5">
+            <a href="{% url 'course_detail' course.pk %}" class="btn btn-outline-danger px-5 py-3 fw-bold rounded-pill">
+                <i class="fas fa-sign-out-alt me-2"></i>Exit Focus Mode
+            </a>
+        </div>
+    </div>
+
+    <div class="ambient-controls">
+        <div class="ambient-btn" id="sound-rain" title="Rain" data-src="https://www.soundjay.com/nature/rain-01.mp3">
+            <i class="fas fa-cloud-showers-heavy"></i>
+        </div>
+        <div class="ambient-btn" id="sound-forest" title="Forest" data-src="https://www.soundjay.com/nature/forest-wind-1.mp3">
+            <i class="fas fa-tree"></i>
+        </div>
+        <div class="ambient-btn" id="sound-lofi" title="Lo-Fi (Simulated)" data-src="https://www.soundjay.com/misc/sounds/wind-chime-1.mp3">
+            <i class="fas fa-music"></i>
+        </div>
+        <div class="ambient-btn" id="sound-white" title="White Noise" data-src="https://www.soundjay.com/mechanical/fan-1.mp3">
+            <i class="fas fa-wind"></i>
+        </div>
+    </div>
+
+    <audio id="ambientAudio" loop></audio>
+
+    <script>
+        // Timer Logic
+        let timeLeft = 25 * 60;
+        let timerId = null;
+        const timerDisplay = document.getElementById('timer');
+        const startBtn = document.getElementById('startBtn');
+        const resetBtn = document.getElementById('resetBtn');
+        const typeBtns = document.querySelectorAll('.timer-type-btn');
+
+        function updateDisplay() {
+            const minutes = Math.floor(timeLeft / 60);
+            const seconds = timeLeft % 60;
+            timerDisplay.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+        }
+
+        function startTimer() {
+            if (timerId) {
+                clearInterval(timerId);
+                timerId = null;
+                startBtn.innerHTML = '<i class="fas fa-play me-2"></i>Start';
+            } else {
+                startBtn.innerHTML = '<i class="fas fa-pause me-2"></i>Pause';
+                timerId = setInterval(() => {
+                    timeLeft--;
+                    updateDisplay();
+                    if (timeLeft === 0) {
+                        clearInterval(timerId);
+                        timerId = null;
+                        alert('Time is up!');
+                        startBtn.innerHTML = '<i class="fas fa-play me-2"></i>Start';
+                    }
+                }, 1000);
+            }
+        }
+
+        function resetTimer() {
+            clearInterval(timerId);
+            timerId = null;
+            const activeType = document.querySelector('.timer-type-btn.active');
+            timeLeft = parseInt(activeType.dataset.time) * 60;
+            updateDisplay();
+            startBtn.innerHTML = '<i class="fas fa-play me-2"></i>Start';
+        }
+
+        startBtn.addEventListener('click', startTimer);
+        resetBtn.addEventListener('click', resetTimer);
+
+        typeBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                typeBtns.forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                timeLeft = parseInt(btn.dataset.time) * 60;
+                updateDisplay();
+                if (timerId) {
+                    clearInterval(timerId);
+                    timerId = null;
+                    startBtn.innerHTML = '<i class="fas fa-play me-2"></i>Start';
+                }
+            });
+        });
+
+        // Ambient Sound Logic
+        const audio = document.getElementById('ambientAudio');
+        const soundBtns = document.querySelectorAll('.ambient-btn');
+
+        soundBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                const src = btn.dataset.src;
+                if (btn.classList.contains('playing')) {
+                    audio.pause();
+                    btn.classList.remove('playing');
+                } else {
+                    soundBtns.forEach(b => b.classList.remove('playing'));
+                    audio.src = src;
+                    audio.play();
+                    btn.classList.add('playing');
+                }
+            });
+        });
+
+        // Zen Mode Toggle
+        const zenToggle = document.getElementById('zenToggle');
+        zenToggle.addEventListener('click', () => {
+            document.body.classList.toggle('zen-mode');
+            if (document.body.classList.contains('zen-mode')) {
+                zenToggle.innerHTML = '<i class="fas fa-eye"></i>';
+            } else {
+                zenToggle.innerHTML = '<i class="fas fa-eye-slash"></i>';
+            }
+        });
+
+        // Initial display
+        updateDisplay();
+    </script>
+</body>
+</html>

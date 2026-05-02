@@ -1,0 +1,153 @@
+{% extends 'courses/base.html' %}
+{% block content %}
+<div class="row g-5">
+    <div class="col-lg-8">
+        <div class="card p-0 border-0 bg-transparent">
+            <div class="p-4 p-md-0">
+                <nav aria-label="breadcrumb" class="mb-4">
+                    <ol class="breadcrumb mb-0">
+                        <li class="breadcrumb-item"><a href="{% url 'home' %}" class="text-primary text-decoration-none small fw-bold">CATALOG</a></li>
+                        <li class="breadcrumb-item active small text-muted" aria-current="page">{{ course.category.name|default:"General" }}</li>
+                    </ol>
+                </nav>
+
+                <h1 class="display-3 fw-bold mb-4">{{ course.title }}</h1>
+                
+                <div class="d-flex flex-wrap align-items-center gap-4 mb-5 p-4 rounded-4 bg-white bg-opacity-50 backdrop-blur shadow-sm border" style="border-color: rgba(61, 43, 31, 0.05) !important;">
+">
+                    <div class="d-flex align-items-center">
+                        <div class="rounded-circle bg-primary bg-opacity-10 p-3 me-3">
+                            <i class="fas fa-user-tie text-primary fa-lg"></i>
+                        </div>
+                        <div>
+                            <div class="text-muted small fw-bold">INSTRUCTOR</div>
+                            <div class="fw-bold text-dark">{{ course.instructor.username }}</div>
+                        </div>
+                    </div>
+                    <div class="vr opacity-10 d-none d-md-block"></div>
+                    <div>
+                        <div class="text-muted small fw-bold">ENROLLED</div>
+                        <div class="fw-bold text-dark">{{ course.enrollments.count }} Students</div>
+                    </div>
+                    <div class="vr opacity-10 d-none d-md-block"></div>
+                    <div>
+                        <div class="text-muted small fw-bold">LEVEL</div>
+                        <div class="fw-bold text-primary">All Levels</div>
+                    </div>
+                </div>
+
+                <div class="mb-5">
+                    <h4 class="fw-bold mb-4 pb-2 border-bottom border-light">Description</h4>
+                    <div class="text-muted fs-5 lh-lg">
+                        {{ course.description|linebreaks }}
+                    </div>
+                </div>
+
+                {% if course.videos.all or course.video_url %}
+                <div class="mb-5">
+                    <h4 class="fw-bold mb-4 pb-2 border-bottom border-light">Video Lectures</h4>
+                    <div class="row g-3">
+                        {% if course.video_url %}
+                        <div class="col-12">
+                            <div class="card p-4 border-0 bg-light d-flex flex-row align-items-center justify-content-between">
+                                <div class="d-flex align-items-center">
+                                    <i class="fas fa-play-circle text-primary me-3 fa-lg"></i>
+                                    <span class="fw-bold">Introductory Session</span>
+                                </div>
+                                <a href="{{ course.video_url }}" target="_blank" class="btn btn-sm btn-primary rounded-pill px-4">Watch</a>
+                            </div>
+                        </div>
+                        {% endif %}
+                        {% for video in course.videos.all %}
+                        <div class="col-12">
+                            <div class="card p-4 border-0 bg-light d-flex flex-row align-items-center justify-content-between">
+                                <div class="d-flex align-items-center">
+                                    <i class="fas fa-play-circle text-primary me-3 fa-lg"></i>
+                                    <span class="fw-bold">{{ video.title }}</span>
+                                </div>
+                                <a href="{{ video.video_url }}" target="_blank" class="btn btn-sm btn-primary rounded-pill px-4">Watch</a>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+
+                {% if course.notes_list.all or course.notes_pdf or course.notes %}
+                <div class="mb-5">
+                    <h4 class="fw-bold mb-4 pb-2 border-bottom border-light">Study Materials</h4>
+                    <div class="p-4 rounded-4 bg-secondary bg-opacity-10">
+                        {% if course.notes %}
+                        <div class="text-muted mb-4 small bg-white bg-opacity-50 p-3 rounded-3 border" style="border-color: rgba(61, 43, 31, 0.05) !important;">
+                            {{ course.notes|linebreaks }}
+                        </div>
+                        {% endif %}
+                        
+                        <div class="list-group list-group-flush bg-transparent">
+                            {% if course.notes_pdf %}
+                            <a href="{{ course.notes_pdf.url }}" target="_blank" class="list-group-item list-group-item-action bg-transparent border-0 d-flex align-items-center py-3">
+                                <i class="fas fa-file-pdf text-danger me-3 fa-lg"></i>
+                                <span class="flex-grow-1 fw-bold">Primary Study Guide</span>
+                                <i class="fas fa-download text-muted small"></i>
+                            </a>
+                            {% endif %}
+                            {% for note in course.notes_list.all %}
+                            <a href="{{ note.pdf_file.url }}" target="_blank" class="list-group-item list-group-item-action bg-transparent border-0 d-flex align-items-center py-3">
+                                <i class="fas fa-file-pdf text-danger me-3 fa-lg"></i>
+                                <span class="flex-grow-1 fw-bold">{{ note.title }}</span>
+                                <i class="fas fa-download text-muted small"></i>
+                            </a>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-4">
+        <div class="sticky-top" style="top: 120px; z-index: 10;">
+            <div class="card p-4 border-0 shadow-lg">
+                <div class="mb-4">
+                    <span class="badge mb-2">LIMITED ACCESS</span>
+                    <h2 class="fw-bold h1 mb-0 text-dark">Free Course</h2>
+                </div>
+
+                <div class="d-grid gap-3 mb-5">
+                    {% if user.is_authenticated %}
+                        {% if user.role == 'Student' %}
+                            {% if is_enrolled %}
+                                <div class="p-3 bg-success bg-opacity-10 rounded-3 text-success text-center fw-bold">
+                                    <i class="fas fa-check-circle me-2"></i>You are Enrolled
+                                </div>
+                                <a href="{% url 'focus_studio' course.pk %}" class="btn btn-primary btn-lg py-3">
+                                    <i class="fas fa-graduation-cap me-2"></i>Enter Studio
+                                </a>
+                            {% else %}
+                                <a href="{% url 'enroll_course' course.pk %}" class="btn btn-primary btn-lg py-3">Enroll for Free</a>
+                            {% endif %}
+                        {% elif user == course.instructor %}
+                            <a href="{% url 'course_edit' course.pk %}" class="btn btn-outline-primary btn-lg py-3">Edit Module</a>
+                        {% endif %}
+                    {% else %}
+                        <a href="{% url 'login' %}?next={{ request.path }}" class="btn btn-primary btn-lg py-3">Sign in to Enroll</a>
+                    {% endif %}
+                </div>
+
+                <div class="p-3 rounded-3 bg-secondary bg-opacity-10 small text-muted">
+                    <div class="d-flex align-items-center mb-3">
+                        <i class="fas fa-infinity text-primary me-3"></i> Full Lifetime Access
+                    </div>
+                    <div class="d-flex align-items-center mb-3">
+                        <i class="fas fa-mobile-alt text-primary me-3"></i> Access on Mobile and PC
+                    </div>
+                    <div class="d-flex align-items-center">
+                        <i class="fas fa-certificate text-primary me-3"></i> Certificate of Completion
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
